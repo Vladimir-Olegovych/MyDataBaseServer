@@ -8,10 +8,11 @@ import models.Info
 import org.apache.commons.io.IOUtils
 import java.net.ServerSocket
 
-
+class Server {
+    
 private lateinit var serverSocket: ServerSocket
 private lateinit var json: Json
-class Server {
+    
     fun start() {
         val kryo = Kryo()
 
