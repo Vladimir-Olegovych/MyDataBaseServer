@@ -17,14 +17,17 @@ class Json(private val name: String, private val info: String){
         }
         return list
     }
+
     fun printJson(){
         val array = arrayOf(Info(name, info))
         try { writeJson(readJson().plus(array)) }
         catch (e: Throwable) { writeJson(array) }
     }
+
     private fun readJson(): Array<Info>{
         return objectMapper.readValue(File("bd.json"), Array<Info>::class.java)
     }
+
     private fun writeJson(array: Array<Info>){
         objectMapper.writeValue(File("bd.json"), array)
     }

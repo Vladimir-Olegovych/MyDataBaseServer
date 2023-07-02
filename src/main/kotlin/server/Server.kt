@@ -9,18 +9,23 @@ import org.apache.commons.io.IOUtils
 import java.net.ServerSocket
 
 class Server {
-    
-private lateinit var serverSocket: ServerSocket
-private lateinit var json: Json
-    
+
+    private lateinit var serverSocket: ServerSocket
+    private lateinit var json: Json
+
     fun start() {
         val kryo = Kryo()
-
         val port = 27015
+        var num = 0
+
         try {
             serverSocket = ServerSocket(port)
             while (true) {
                 val socket = serverSocket.accept()
+
+                num += 1
+                println("new client [$num]")
+
 
                 val inputStream = socket.getInputStream()
                 val input = Input(inputStream)
@@ -29,20 +34,25 @@ private lateinit var json: Json
                 val output = Output(outputStream)
 
                 kryo.register(Info::class.java)
-                val obj = kryo.readObject(input, Info::class.java)
+                kryo.register(ArrayList<Info>()::class.java)
 
-                if (obj.info == "get_json_info_10471994_JSON") {
-                    json = Json("null", "null")
-                    kryo.register(ArrayList<Info>()::class.java)
-                    kryo.writeObject(output, json.getJson())
-                    output.flush()
-                } else {
-                    json = Json(obj.name, obj.info)
-                    json.printJson()
+                val get = kryo.readObject(input, Info::class.java)
+                json = Json(get.name, get.info)
 
-                    kryo.register(ArrayList<Info>()::class.java)
-                    kryo.writeObject(output, json.getJson())
-                    output.flush()
+                when (get.info) {
+                    GET_JSON_ARRAY -> {
+                        kryo.writeObject(output, json.getJson())
+                        output.flush()
+                    }
+                    GET_MESSAGE -> {
+                        kryo.writeObject(output, json.getJson().get(json.getJson().size - 1))
+                        output.flush()
+                    }
+                    else -> {
+                        json.printJson()
+                        kryo.writeObject(output, json.getJson().get(json.getJson().size - 1))
+                        output.flush()
+                    }
                 }
             }
 
@@ -52,5 +62,9 @@ private lateinit var json: Json
         } finally {
             IOUtils.closeQuietly(serverSocket)
         }
+    }
+    companion object {
+        const val GET_JSON_ARRAY = "get_json_array_19789139"
+        const val GET_MESSAGE = "get_massage_json_19789139"
     }
 }
