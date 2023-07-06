@@ -7,6 +7,7 @@ import json.Json
 import models.Info
 import org.apache.commons.io.IOUtils
 import java.net.ServerSocket
+import java.util.*
 
 class Server {
 
@@ -34,13 +35,13 @@ class Server {
                 val output = Output(outputStream)
 
                 kryo.register(Info::class.java)
-                kryo.register(ArrayList<Info>()::class.java)
 
                 val get = kryo.readObject(input, Info::class.java)
                 json = Json(get.name, get.info)
 
                 when (get.info) {
                     GET_JSON_ARRAY -> {
+                        kryo.register(ArrayList<Info>()::class.java)
                         kryo.writeObject(output, json.getJson())
                         output.flush()
                     }
