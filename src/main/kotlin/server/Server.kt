@@ -17,47 +17,41 @@ class Server {
     fun start() {
         val kryo = Kryo()
         val port = 27015
-        var num = 0
 
         try {
             serverSocket = ServerSocket(port)
+
+            println("server_started")
+
+            kryo.register(Info::class.java)
+            kryo.register(ArrayList<Info>()::class.java)
+
             while (true) {
                 val socket = serverSocket.accept()
+                println("connect_${socket.inetAddress}:${socket.port}")
 
-                num += 1
-                println("new client [$num]")
-
-
-                val inputStream = socket.getInputStream()
-                val input = Input(inputStream)
-
-                val outputStream = socket.getOutputStream()
-                val output = Output(outputStream)
-
-                kryo.register(Info::class.java)
+                val input = Input(socket.getInputStream())
+                val output = Output(socket.getOutputStream())
 
                 val get = kryo.readObject(input, Info::class.java)
                 json = Json(get.name, get.info)
 
                 when (get.info) {
                     GET_JSON_ARRAY -> {
-                        kryo.register(ArrayList<Info>()::class.java)
                         kryo.writeObject(output, json.getJson())
                         output.flush()
                     }
                     GET_MESSAGE -> {
-                        kryo.writeObject(output, json.getJson().get(json.getJson().size - 1))
+                        kryo.writeObject(output, json.getJson()[json.getJson().size - 1])
                         output.flush()
                     }
                     else -> {
                         json.printJson()
-                        kryo.writeObject(output, json.getJson().get(json.getJson().size - 1))
+                        kryo.writeObject(output, json.getJson()[json.getJson().size - 1])
                         output.flush()
                     }
                 }
             }
-
-
         } catch (e: Throwable) {
             e.printStackTrace()
         } finally {

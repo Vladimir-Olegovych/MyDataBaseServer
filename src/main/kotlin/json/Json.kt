@@ -13,7 +13,7 @@ class Json(private val name: String, private val info: String){
         try {
         readJson().forEach { list.add(Info(it.name, it.info)) }
         }catch (e: Throwable){
-            list.add(Info("null", "null"))
+            list.add(Info("start", "new history"))
         }
         return list
     }
