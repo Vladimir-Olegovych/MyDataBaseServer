@@ -47,8 +47,6 @@ class Server {
                     }
                     else -> {
                         json.printJson()
-                        kryo.writeObject(output, json.getJson()[json.getJson().size - 1])
-                        output.flush()
                     }
                 }
             }
